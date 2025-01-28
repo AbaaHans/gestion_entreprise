@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ client.name }} - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ client.name }}</h3>
+                <a href="{% url 'client_update' client.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Email:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ client.email }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Téléphone:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ client.phone }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Adresse:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ client.address|linebreaks }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Date de création:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ client.created_at|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Notes</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.content.label_tag }}
+                        {{ form.content }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ajouter une note</button>
+                </form>
+
+                <div class="list-group">
+                    {% for note in notes %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ note.agent.username }}</h6>
+                            <small>{{ note.created_at|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <p class="mb-1">{{ note.content|linebreaks }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Aucune note pour ce client</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Factures</h4>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for invoice in client.invoice_set.all %}
+                    <a href="{% url 'invoice_detail' invoice.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Facture #{{ invoice.invoice_number }}</h6>
+                            <small>{{ invoice.date|date:"d/m/Y" }}</small>
+                        </div>
+                        <p class="mb-1">{{ invoice.get_status_display }}</p>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">Aucune facture pour ce client</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

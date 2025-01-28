@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">{{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.invoice_number.id_for_label }}"
+                             class="form-label">Numéro de facture</label>
+                            {{ form.invoice_number }}
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.client.id_for_label }}" 
+                            class="form-label">{{ form.client.label }}</label>
+                            {{ form.client }}
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.client.id_for_label }}" 
+                            class="form-label">{{ form.agent.label }}</label>
+                            {{ form.agent }}
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.client.id_for_label }}" 
+                            class="form-label">{{ form.status.label }}</label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.date.id_for_label }}" 
+                            class="form-label"> {{ form.date.label }} </label>
+                            {{ form.date}}
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.due_date.id_for_label }}" 
+                            class="form-label">Date d'échéance</label>
+                            {{ form.due_date}}
+                        </div>
+                        
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3">Articles de la facture</h5>
+                    {{ formset.management_form }}
+                    <div id="invoice-items">
+                        {% for form in formset %}
+                        <div class="invoice-item card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label for="{{ form.product.id_for_label }}"
+                                        class="form-label">Produit</label>
+                                        {{ form.product }}
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="{{ form.service.id_for_label }}"
+                                        class="form-label">{{ form.service.label }}</label>
+                                        {{ form.service }}
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="{{ form.description.id_for_label }}"
+                                        class="form-label">{{ form.description.label }} </label>
+                                        {{ form.description}}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.quantity.id_for_label }}"
+                                        class="form-label">Quantité</label>
+                                        {{ form.quantity }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="{{ form.unit_price.id_for_label }}"
+                                        class="form-label">Prix Dhs</label>
+                                        {{ form.unit_price }}
+                                    </div>
+                                </div>
+                                {% if formset.can_delete %}
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-danger btn-sm remove-form">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8 text-end">
+                            <strong>Total TTC:</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <div id="grand-total" class="form-control-plaintext"> dhs</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-info mb-4" id="add-form">
+                        <i class="fas fa-plus"></i> Ajouter un article
+                    </button>
+
+                    {{ form.notes }}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'invoice_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% load static %}
+{% block extra_js %}
+<script src="{% static 'js/invoice.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialisation
+    updateTotals();
+
+    // Événements pour les changements de produit/service
+    document.querySelectorAll('[name$="-product"]').forEach(select => {
+        select.addEventListener('change', e => updatePriceFromProduct(e.target));
+    });
+
+    document.querySelectorAll('[name$="-service"]').forEach(select => {
+        select.addEventListener('change', e => updatePriceFromService(e.target));
+    });
+
+    // Événements pour les changements de quantité/prix
+    document.querySelectorAll('[name$="-quantity"], [name$="-unit_price"]').forEach(input => {
+        input.addEventListener('input', updateTotals);
+    });
+
+    // Gestion de l'ajout/suppression de lignes
+    const addButton = document.getElementById('add-form');
+    const itemsContainer = document.getElementById('invoice-items');
+    
+    addButton.addEventListener('click', function() {
+        const formCount = itemsContainer.children.length;
+        const template = itemsContainer.children[0].cloneNode(true);
+        
+        template.innerHTML = template.innerHTML.replace(/-\d+-/g, `-${formCount}-`);
+        template.querySelectorAll('input, select').forEach(input => {
+            input.value = '';
+            if (input.type !== 'hidden') {
+                input.addEventListener('input', updateTotals);
+            }
+            if (input.tagName === 'SELECT') {
+                input.addEventListener('change', e => {
+                    if (input.name.includes('-product')) {
+                        updatePriceFromProduct(e.target);
+                    } else if (input.name.includes('-service')) {
+                        updatePriceFromService(e.target);
+                    }
+                });
+            }
+        });
+        
+        itemsContainer.appendChild(template);
+        document.getElementById('id_items-TOTAL_FORMS').value = formCount + 1;
+        updateTotals();
+    });
+    
+    itemsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-form')) {
+            const item = e.target.closest('.invoice-item');
+            if (itemsContainer.children.length > 1) {
+                item.remove();
+                document.getElementById('id_items-TOTAL_FORMS').value = itemsContainer.children.length;
+                updateTotals();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
+

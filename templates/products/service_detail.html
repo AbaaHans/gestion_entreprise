@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.name }} - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ service.name }}</h3>
+                <div>
+                    <a href="{% url 'service_update' service.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'service_delete' service.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Description:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ service.description|linebreaks }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Prix:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ service.price }} €
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Durée:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ service.duration }} minutes
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

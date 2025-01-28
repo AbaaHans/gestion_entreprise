@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Clients</h5>
+                <p class="card-text display-4">{{ clients_count }}</p>
+                <a href="{% url 'client_list' %}" class="text-white">Voir tous <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Produits</h5>
+                <p class="card-text display-4">{{ products_count }}</p>
+                <a href="{% url 'product_list' %}" class="text-white">Voir tous <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Fournisseur</h5>
+                <p class="card-text display-4">{{ suppliers_count }}</p>
+                <a href="{% url 'supplier_list' %}" class="text-white">Voir tous <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">Factures</h5>
+                <p class="card-text display-4">{{ invoices_count }}</p>
+                <a href="{% url 'invoice_list' %}" class="text-white">Voir toutes <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Clients récents</h5>
+                <a href="{% url 'client_create' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau client
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for client in recent_clients %}
+                    <a href="{% url 'client_detail' client.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ client.name }}</h6>
+                            <small>{{ client.created_at|date:"d/m/Y" }}</small>
+                        </div>
+                        <small>{{ client.email }}</small>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">Aucun client enregistré</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Factures récentes</h5>
+                <a href="{% url 'invoice_create' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle facture
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for invoice in recent_invoices %}
+                    <a href="{% url 'invoice_detail' invoice.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Facture #{{ invoice.invoice_number }}</h6>
+                            <small>{{ invoice.date|date:"d/m/Y" }}</small>
+                        </div>
+                        <small>{{ invoice.client.name }} - {{ invoice.get_status_display }}</small>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">Aucune facture enregistrée</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if low_stock_products %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Alerte stock bas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Catégorie</th>
+                                <th>Stock actuel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in low_stock_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>{{ product.stock }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

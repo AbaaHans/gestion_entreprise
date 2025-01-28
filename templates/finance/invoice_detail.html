@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Facture #{{ invoice.invoice_number }} - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Facture #{{ invoice.invoice_number }}</h2>
+    <div>
+        <a href="{% url 'invoice_print' invoice.pk %}" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Imprimer
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Détails de la facture</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Client:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        <a href="{% url 'client_detail' invoice.client.pk %}">{{ invoice.client.name }}</a>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Date:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ invoice.date|date:"d/m/Y" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Date d'échéance:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ invoice.due_date|date:"d/m/Y" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Statut:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        <span class="badge {% if invoice.status == 'paid' %}bg-success
+                                   {% elif invoice.status == 'sent' %}bg-info
+                                   {% elif invoice.status == 'cancelled' %}bg-danger
+                                   {% else %}bg-warning{% endif %}">
+                            {{ invoice.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Agent:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ invoice.agent.username }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Articles</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in invoice.items.all %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.quantity|floatformat:0 }}</td>
+                                <td>{{ item.unit_price|floatformat:0 }} Dhs</td>
+                                <td>{{ item.get_total|floatformat:0 }} Dhs</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>{{ invoice.get_total|floatformat:0 }} dhs</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% if invoice.notes %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Notes</h4>
+            </div>
+            <div class="card-body">
+                {{ invoice.notes|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Informations client</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Email:</strong> {{ invoice.client.email }}</p>
+                <p><strong>Téléphone:</strong> {{ invoice.client.phone }}</p>
+                <p><strong>Adresse:</strong><br>{{ invoice.client.address|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

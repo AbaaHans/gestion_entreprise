@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block title %}Statistiques Financières - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Statistiques Financières</h2>
+    <a href="{% url 'print_statistics' %}" class="btn btn-primary">
+        <i class="fas fa-print"></i> Imprimer le rapport
+    </a>
+</div>
+
+<div class="row">
+    <!-- Statistiques journalières -->
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Aujourd'hui</h5>
+                <p class="display-6">{{ stats.daily|floatformat:0|intcomma }} FCFA</p>
+                <small>Revenus du jour</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques hebdomadaires -->
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Cette semaine</h5>
+                <p class="display-6">{{ stats.weekly|floatformat:0|intcomma }} FCFA</p>
+                <small>Revenus de la semaine</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques mensuelles -->
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Ce mois</h5>
+                <p class="display-6">{{ stats.monthly|floatformat:0|intcomma }} FCFA</p>
+                <small>Revenus du mois</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques annuelles -->
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">Cette année</h5>
+                <p class="display-6">{{ stats.yearly|floatformat:0|intcomma }} FCFA</p>
+                <small>Revenus de l'année</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphique des revenus -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Évolution des revenus (FCFA)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Aujourd\'hui', 'Cette semaine', 'Ce mois', 'Cette année'],
+            datasets: [{
+                label: 'Revenus (FCFA)',
+                data: [
+                    {{ stats.daily }},
+                    {{ stats.weekly }},
+                    {{ stats.monthly }},
+                    {{ stats.yearly }}
+                ],
+                backgroundColor: [
+                    'rgba(13, 110, 253, 0.5)',  // Primary
+                    'rgba(25, 135, 84, 0.5)',   // Success
+                    'rgba(13, 202, 240, 0.5)',  // Info
+                    'rgba(255, 193, 7, 0.5)'    // Warning
+                ],
+                borderColor: [
+                    'rgb(13, 110, 253)',
+                    'rgb(25, 135, 84)',
+                    'rgb(13, 202, 240)',
+                    'rgb(255, 193, 7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return new Intl.NumberFormat('fr-FR').format(context.raw) + ' FCFA';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

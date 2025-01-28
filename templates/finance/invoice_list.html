@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load invoice_tags %}
+
+{% block title %}Factures - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Liste des factures</h2>
+    <a href="{% url 'invoice_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouvelle facture
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Échéance</th>
+                        <th>Statut</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.client.name }}</td>
+                        <td>{{ invoice.date|date:"d/m/Y" }}</td>
+                        <td>{{ invoice.due_date|date:"d/m/Y" }}</td>
+                        <td>
+                            <button class="btn status-select {{ invoice.status|status_class }}"
+                                    data-invoice-id="{{ invoice.pk }}"
+                                    data-choices="{{ invoice.STATUS_CHOICES|choices_json }}"
+                                    value="{{ invoice.status }}">
+                                {{ invoice.get_status_display }}
+                            </button>
+                        </td>
+                        <td>{{ invoice.get_total|floatformat:0}} dhs</td>
+                        <td>
+                            <a href="{% url 'invoice_detail' invoice.pk %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'invoice_update' invoice.pk %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'invoice_delete' invoice.pk %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            <a href="{% url 'invoice_print' invoice.pk %}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-print"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Aucune facture enregistrée</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script type="module">
+    import { initializeStatusUpdates } from "{% static 'js/invoice/status.js' %}";
+    document.addEventListener('DOMContentLoaded', initializeStatusUpdates);
+</script>
+{% endblock %}
+{% endblock %}

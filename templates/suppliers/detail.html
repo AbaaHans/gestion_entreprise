@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ supplier.name }} - Gestion d'Entreprise{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ supplier.name }}</h3>
+                <div>
+                    <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Code fournisseur:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.code }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Type de fournisseur:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.supplier_type.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Secteur d'activité:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.business_sector.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Adresse:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.address|linebreaks }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Téléphone:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.phone }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Email:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.email }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Types de produits/services:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ supplier.product_types|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
